@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>For You</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+
+  /* ============================================================
+     CUSTOMIZE HERE
+     Change the text below to make the page yours.
+     Nothing else in the file needs to change.
+     ============================================================ */
+  :root{
+    --her-name: "Kiara";
+    --sender-name: "Someone who notices you";
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    background: #FBF3EE;
+    font-family: 'Jost', sans-serif;
+    color: #3B2E2A;
+    overflow-x: hidden;
+  }
+
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 16px;
+  }
+
+  /* soft floral background pattern */
+  .flower-pattern {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.55;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><g transform='translate(30,30)'><ellipse cx='0' cy='-10' rx='6' ry='10' fill='%23F0CBD3'/><ellipse cx='0' cy='10' rx='6' ry='10' fill='%23F0CBD3'/><ellipse cx='-10' cy='0' rx='10' ry='6' fill='%23F0CBD3'/><ellipse cx='10' cy='0' rx='10' ry='6' fill='%23F0CBD3'/><circle cx='0' cy='0' r='5' fill='%23D79AA4'/></g><g transform='translate(98,78) rotate(25)' opacity='0.85'><ellipse cx='0' cy='-8' rx='5' ry='8' fill='%23F5DEE2'/><ellipse cx='0' cy='8' rx='5' ry='8' fill='%23F5DEE2'/><ellipse cx='-8' cy='0' rx='8' ry='5' fill='%23F5DEE2'/><ellipse cx='8' cy='0' rx='8' ry='5' fill='%23F5DEE2'/><circle cx='0' cy='0' r='4' fill='%23D79AA4'/></g><g transform='translate(58,116) rotate(-18) scale(0.72)' opacity='0.8'><ellipse cx='0' cy='-10' rx='6' ry='10' fill='%23F0CBD3'/><ellipse cx='0' cy='10' rx='6' ry='10' fill='%23F0CBD3'/><ellipse cx='-10' cy='0' rx='10' ry='6' fill='%23F0CBD3'/><ellipse cx='10' cy='0' rx='10' ry='6' fill='%23F0CBD3'/><circle cx='0' cy='0' r='5' fill='%23D79AA4'/></g></svg>");
+    background-repeat: repeat;
+    background-size: 150px 150px;
+  }
+
+  /* soft background bloom */
+  .bg-bloom {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(circle at 12% 15%, rgba(199,138,143,0.16), transparent 38%),
+      radial-gradient(circle at 88% 20%, rgba(141,158,120,0.14), transparent 40%),
+      radial-gradient(circle at 50% 92%, rgba(199,138,143,0.12), transparent 45%),
+      radial-gradient(circle, #FBF3EE 0%, #FBF3EE 55%, rgba(251,243,238,0.85) 100%);
+  }
+
+  .stage {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 520px;
+  }
+
+  /* ---------- Falling petals ---------- */
+  .petals {
+    position: fixed;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .petal {
+    position: absolute;
+    top: -24px;
+    animation-name: petal-fall;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+  }
+
+  .petal svg { width: 100%; height: 100%; display: block; }
+
+  @keyframes petal-fall {
+    0%   { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+    8%   { opacity: 0.9; }
+    100% { transform: translate(var(--drift), 108vh) rotate(var(--spin)); opacity: 0; }
+  }
+
+  /* ---------- Envelope ---------- */
+  #envelope-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 70vh;
+    text-align: center;
+    cursor: pointer;
+  }
+
+  .envelope-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .envelope-glow {
+    position: absolute;
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(199,130,143,0.38), transparent 70%);
+    z-index: -1;
+    animation: glow-pulse 3.2s ease-in-out infinite;
+  }
+
+  @keyframes glow-pulse {
+    0%, 100% { transform: scale(0.88); opacity: 0.55; }
+    50%      { transform: scale(1.18); opacity: 1; }
+  }
+
+  .envelope {
+    position: relative;
+    width: 220px;
+    height: 150px;
+    animation: envelope-float 4s ease-in-out infinite;
+  }
+
+  @keyframes envelope-float {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-9px); }
+  }
+
+  .envelope-body {
+    position: absolute;
+    inset: 0;
+    background: #FFFDF9;
+    border: 1px solid #E3CFC6;
+    border-radius: 4px;
+    box-shadow: 0 18px 40px -20px rgba(59,46,42,0.35);
+  }
+
+  .envelope-flap {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 0;
+    border-left: 110px solid transparent;
+    border-right: 110px solid transparent;
+    border-top: 90px solid #F3E1D8;
+    transform-origin: top;
+    transition: transform 0.7s cubic-bezier(.6,.1,.3,1);
+    z-index: 2;
+  }
+
+  .envelope-seal {
+    position: absolute;
+    top: 62px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #C7828F;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+    transition: opacity 0.3s ease;
+  }
+
+  .envelope-seal svg { width: 16px; height: 16px; fill: #FBF3EE; }
+
+  .envelope-prompt {
+    margin-top: 20px;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    color: #8A6F63;
+  }
+
+  .bouquet {
+    width: 128px;
+    height: auto;
+    margin-top: 22px;
+    animation: bouquet-sway 5s ease-in-out infinite;
+    transform-origin: bottom center;
+  }
+
+  @keyframes bouquet-sway {
+    0%, 100% { transform: rotate(-2.5deg); }
+    50%      { transform: rotate(2.5deg); }
+  }
+
+  #envelope-stage.opened .envelope-flap {
+    transform: rotateX(180deg);
+  }
+
+  #envelope-stage.opened .envelope-seal {
+    opacity: 0;
+  }
+
+  #envelope-stage.opened {
+    animation: fadeOut 0.6s ease 0.55s forwards;
+    pointer-events: none;
+  }
+
+  @keyframes fadeOut {
+    to { opacity: 0; height: 0; min-height: 0; margin: 0; overflow: hidden; }
+  }
+
+  /* ---------- Letter ---------- */
+  #letter-stage {
+    display: none;
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  #letter-stage.visible {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .card {
+    position: relative;
+    background: #FFFDF9;
+    border: 1px solid #ECDDD3;
+    border-radius: 6px;
+    padding: 56px 40px 44px;
+    box-shadow: 0 30px 60px -30px rgba(59,46,42,0.3);
+  }
+
+  .corner {
+    position: absolute;
+    width: 76px;
+    height: 76px;
+    opacity: 0.9;
+  }
+  .corner svg { width: 100%; height: 100%; }
+  .corner.tl { top: -10px; left: -10px; }
+  .corner.br { bottom: -10px; right: -10px; transform: rotate(180deg); }
+
+  /* ---------- Heart made of "I love you" ---------- */
+  .heart-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 8px;
+  }
+
+  #heart-canvas {
+    width: 220px;
+    height: 190px;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  #heart-canvas.visible { opacity: 1; }
+
+  .greeting {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 30px;
+    font-weight: 500;
+    margin: 0 0 22px;
+    color: #3B2E2A;
+  }
+
+  .letter-body {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    line-height: 1.75;
+    color: #4A3A34;
+    max-width: 62ch;
+  }
+
+  .letter-body p { margin: 0 0 18px; }
+
+  .signature {
+    margin-top: 30px;
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 19px;
+    color: #8A6F63;
+  }
+
+  .divider {
+    width: 40px;
+    height: 1px;
+    background: #C7828F;
+    margin: 28px 0;
+    opacity: 0.5;
+  }
+
+  .flower-row {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    margin-top: 36px;
+    opacity: 0.85;
+  }
+  .flower-row svg { width: 22px; height: 22px; }
+
+  /* ---------- Secret at the end ---------- */
+  .secret {
+    margin-top: 34px;
+    text-align: center;
+  }
+
+  .secret-btn {
+    background: none;
+    border: 1px dashed #D9BDB4;
+    border-radius: 20px;
+    padding: 9px 20px;
+    font-family: 'Jost', sans-serif;
+    font-size: 12.5px;
+    letter-spacing: 0.03em;
+    color: #8A6F63;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+
+  .secret-btn:hover {
+    background: #FBF0EA;
+    border-color: #C7828F;
+  }
+
+  .secret-btn.hidden { display: none; }
+
+  .secret-message {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.6s ease, opacity 0.6s ease, margin 0.6s ease;
+  }
+
+  .secret-message.shown {
+    max-height: 200px;
+    opacity: 1;
+    margin-top: 18px;
+  }
+
+  .secret-message p {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 19px;
+    color: #B96F7D;
+    margin: 0;
+    padding: 16px 18px;
+    border: 1px solid #EFD9D0;
+    border-radius: 8px;
+    background: #FFF8F4;
+  }
+
+  @media (max-width: 480px) {
+    .card { padding: 44px 24px 34px; }
+    .greeting { font-size: 26px; }
+    .letter-body { font-size: 18px; }
+  }
+
+</style>
+</head>
+<body>
+
+<div class="flower-pattern"></div>
+<div class="bg-bloom"></div>
+<div class="petals" id="petals"></div>
+
+<div class="stage">
+
+  <div id="envelope-stage">
+    <div class="envelope-wrap">
+      <div class="envelope-glow"></div>
+      <div class="envelope">
+        <div class="envelope-body"></div>
+        <div class="envelope-seal">
+          <svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-10-9.2C0.3 8.2 2 4 6.2 4c2.2 0 3.8 1.4 5.8 4 2-2.6 3.6-4 5.8-4C22 4 23.7 8.2 22 11.8 19.5 16.4 12 21 12 21z"/></svg>
+        </div>
+        <div class="envelope-flap"></div>
+      </div>
+    </div>
+    <div class="envelope-prompt">tap to open</div>
+
+    <svg class="bouquet" viewBox="0 0 140 170" xmlns="http://www.w3.org/2000/svg">
+      <path d="M70 150 C 60 120, 40 100, 28 70" stroke="#8A9A7E" stroke-width="2.5" fill="none"/>
+      <path d="M70 150 C 65 115, 55 95, 50 65" stroke="#8A9A7E" stroke-width="2.5" fill="none"/>
+      <path d="M70 150 C 70 110, 70 90, 70 58" stroke="#8A9A7E" stroke-width="2.5" fill="none"/>
+      <path d="M70 150 C 75 115, 85 95, 90 65" stroke="#8A9A7E" stroke-width="2.5" fill="none"/>
+      <path d="M70 150 C 80 120, 100 100, 112 70" stroke="#8A9A7E" stroke-width="2.5" fill="none"/>
+
+      <path d="M52 134 L70 116 L88 134 Z" fill="#C7828F"/>
+      <circle cx="70" cy="126" r="5.5" fill="#8A6F63"/>
+
+      <g transform="translate(28,70)">
+        <circle cx="0" cy="-7" r="6" fill="#C7828F"/><circle cx="0" cy="7" r="6" fill="#C7828F"/>
+        <circle cx="-7" cy="0" r="6" fill="#C7828F"/><circle cx="7" cy="0" r="6" fill="#C7828F"/>
+        <circle cx="0" cy="0" r="4" fill="#8A6F63"/>
+      </g>
+      <g transform="translate(50,64)">
+        <circle cx="0" cy="-6" r="5.5" fill="#E3B6BC"/><circle cx="0" cy="6" r="5.5" fill="#E3B6BC"/>
+        <circle cx="-6" cy="0" r="5.5" fill="#E3B6BC"/><circle cx="6" cy="0" r="5.5" fill="#E3B6BC"/>
+        <circle cx="0" cy="0" r="3.5" fill="#8A6F63"/>
+      </g>
+      <g transform="translate(70,54)">
+        <circle cx="0" cy="-8" r="7" fill="#C7828F"/><circle cx="0" cy="8" r="7" fill="#C7828F"/>
+        <circle cx="-8" cy="0" r="7" fill="#C7828F"/><circle cx="8" cy="0" r="7" fill="#C7828F"/>
+        <circle cx="0" cy="0" r="4.5" fill="#8A6F63"/>
+      </g>
+      <g transform="translate(90,64)">
+        <circle cx="0" cy="-6" r="5.5" fill="#E3B6BC"/><circle cx="0" cy="6" r="5.5" fill="#E3B6BC"/>
+        <circle cx="-6" cy="0" r="5.5" fill="#E3B6BC"/><circle cx="6" cy="0" r="5.5" fill="#E3B6BC"/>
+        <circle cx="0" cy="0" r="3.5" fill="#8A6F63"/>
+      </g>
+      <g transform="translate(112,70)">
+        <circle cx="0" cy="-7" r="6" fill="#C7828F"/><circle cx="0" cy="7" r="6" fill="#C7828F"/>
+        <circle cx="-7" cy="0" r="6" fill="#C7828F"/><circle cx="7" cy="0" r="6" fill="#C7828F"/>
+        <circle cx="0" cy="0" r="4" fill="#8A6F63"/>
+      </g>
+    </svg>
+  </div>
+
+  <div id="letter-stage">
+    <div class="card">
+
+      <div class="corner tl">
+        <svg viewBox="0 0 100 100" fill="none">
+          <path d="M5 5 C 20 20, 20 40, 5 55" stroke="#8A9A7E" stroke-width="2" fill="none"/>
+          <circle cx="14" cy="14" r="7" fill="#C7828F" opacity="0.8"/>
+          <circle cx="26" cy="10" r="5" fill="#E3B6BC" opacity="0.8"/>
+          <circle cx="8" cy="28" r="4.5" fill="#8A9A7E" opacity="0.7"/>
+        </svg>
+      </div>
+
+      <div class="corner br">
+        <svg viewBox="0 0 100 100" fill="none">
+          <path d="M5 5 C 20 20, 20 40, 5 55" stroke="#8A9A7E" stroke-width="2" fill="none"/>
+          <circle cx="14" cy="14" r="7" fill="#C7828F" opacity="0.8"/>
+          <circle cx="26" cy="10" r="5" fill="#E3B6BC" opacity="0.8"/>
+          <circle cx="8" cy="28" r="4.5" fill="#8A9A7E" opacity="0.7"/>
+        </svg>
+      </div>
+
+      <div class="heart-wrap">
+        <canvas id="heart-canvas" width="220" height="190"></canvas>
+      </div>
+
+      <h1 class="greeting" id="greeting"></h1>
+
+      <div class="letter-body" id="letter-body">
+        <!-- ============================================================
+             CUSTOMIZE YOUR LETTER HERE.
+             Each <p> is one paragraph. Add, remove, or edit freely.
+             ============================================================ -->
+        <p>Hi Kiara, hopefully you're reading this as of now, September 14, 2026. Di na ko magpapaligoy-ligoy pa, pero I actually admire you. You're beautiful, and you have a beautiful smile. Minsan maingay yung room, pero minsan ikaw pa ang pinakamaingay dyan AHAHAHAHA.</p>
+        <p>I don't know if you'll ever find out who wrote this, and that's fine. I just wanted you to know, once, that someone sees you. Not just how you look. The way you laugh at your own dark jokes (eme) before anyone else does. The way you're kind to people even when nobody's watching. Those are the things I actually admire.</p>
+        <p>Wala naman akong hinihingi. I'm not going to walk up to you and make this awkward. I just wanted one honest moment where you knew someone thinks you're genuinely remarkable.</p>
+        <p>Have a good day. Alam kong pagod ka after this exam, you deserve a really good rest. And sana makita mo na rin the one (sus).</p>
+      </div>
+
+      <div class="signature" id="signature"></div>
+
+      <div class="flower-row">
+        <svg viewBox="0 0 24 24" fill="#C7828F"><circle cx="12" cy="6" r="4"/><circle cx="12" cy="18" r="4"/><circle cx="6" cy="12" r="4"/><circle cx="18" cy="12" r="4"/><circle cx="12" cy="12" r="3" fill="#8A6F63"/></svg>
+        <svg viewBox="0 0 24 24" fill="#8A9A7E"><circle cx="12" cy="6" r="4"/><circle cx="12" cy="18" r="4"/><circle cx="6" cy="12" r="4"/><circle cx="18" cy="12" r="4"/><circle cx="12" cy="12" r="3" fill="#8A6F63"/></svg>
+        <svg viewBox="0 0 24 24" fill="#E3B6BC"><circle cx="12" cy="6" r="4"/><circle cx="12" cy="18" r="4"/><circle cx="6" cy="12" r="4"/><circle cx="18" cy="12" r="4"/><circle cx="12" cy="12" r="3" fill="#8A6F63"/></svg>
+      </div>
+
+      <div class="secret">
+        <button class="secret-btn" id="secret-btn">psst, may isa pa akong sikreto</button>
+        <div class="secret-message" id="secret-message">
+          <p id="secret-text"></p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const herName = getComputedStyle(document.documentElement).getPropertyValue('--her-name').trim().replace(/"/g, '');
+  const senderName = getComputedStyle(document.documentElement).getPropertyValue('--sender-name').trim().replace(/"/g, '');
+
+  /* ============================================================
+     CUSTOMIZE THE SECRET LINE HERE
+     ============================================================ */
+  const secretMessage = "Libre kita McDo once na malaman mo kung sino ako.";
+
+  document.getElementById('greeting').textContent = herName ? `To ${herName}` : 'To you';
+  document.getElementById('signature').textContent = senderName || 'A quiet admirer';
+  document.getElementById('secret-text').textContent = secretMessage;
+
+  const envelopeStage = document.getElementById('envelope-stage');
+  const letterStage = document.getElementById('letter-stage');
+
+  envelopeStage.addEventListener('click', () => {
+    envelopeStage.classList.add('opened');
+    setTimeout(() => {
+      letterStage.classList.add('visible');
+      drawHeart();
+    }, 500);
+  });
+
+  /* ---------- Secret reveal ---------- */
+  const secretBtn = document.getElementById('secret-btn');
+  const secretMessageEl = document.getElementById('secret-message');
+
+  secretBtn.addEventListener('click', () => {
+    secretMessageEl.classList.add('shown');
+    secretBtn.classList.add('hidden');
+  });
+
+  /* ---------- Heart made of "I love you" ---------- */
+  function drawHeart() {
+    const canvas = document.getElementById('heart-canvas');
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width;
+    const h = canvas.height;
+    const cx = w / 2;
+    const cy = h / 2 + 14;
+    const unit = 4.6;
+    const colors = ['#C7828F', '#D9A5AC', '#B96F7D'];
+
+    const points = [];
+    for (let s = 0; s < 6; s++) {
+      const scaleFactor = (11 + s) / 16;
+      for (let i = 0; i < 70; i++) {
+        const angle = (i * Math.PI * 2) / 70;
+        const x = 16 * Math.pow(Math.sin(angle), 3) * scaleFactor;
+        const y =
+          (13 * Math.cos(angle) -
+            5 * Math.cos(2 * angle) -
+            2 * Math.cos(3 * angle) -
+            Math.cos(4 * angle)) *
+          scaleFactor;
+        points.push({ x: cx + x * unit, y: cy - y * unit });
+      }
+    }
+
+    ctx.clearRect(0, 0, w, h);
+    canvas.classList.add('visible');
+    ctx.font = "7px 'Jost', sans-serif";
+    ctx.textAlign = 'center';
+
+    let i = 0;
+    const perFrame = 6;
+
+    function step() {
+      for (let n = 0; n < perFrame && i < points.length; n++, i++) {
+        const p = points[i];
+        ctx.fillStyle = colors[i % colors.length];
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate((Math.random() - 0.5) * 0.5);
+        ctx.fillText('I love you', 0, 0);
+        ctx.restore();
+      }
+      if (i < points.length) {
+        requestAnimationFrame(step);
+      }
+    }
+    requestAnimationFrame(step);
+  }
+
+  /* ---------- Falling petals ---------- */
+  const petalColors = ['#C7828F', '#E3B6BC', '#8A9A7E', '#D9A5AC'];
+  const petalsContainer = document.getElementById('petals');
+
+  function spawnPetal() {
+    const petal = document.createElement('div');
+    petal.className = 'petal';
+
+    const size = 10 + Math.random() * 10;
+    const left = Math.random() * 100;
+    const duration = 7 + Math.random() * 6;
+    const drift = Math.random() * 160 - 80;
+    const spin = Math.random() * 300 - 150;
+    const color = petalColors[Math.floor(Math.random() * petalColors.length)];
+
+    petal.style.left = left + 'vw';
+    petal.style.width = size + 'px';
+    petal.style.height = size + 'px';
+    petal.style.setProperty('--drift', drift + 'px');
+    petal.style.setProperty('--spin', spin + 'deg');
+    petal.style.animationDuration = duration + 's';
+
+    petal.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 2C7 2 4 6 4 10c0 5 4 9 8 12 4-3 8-7 8-12 0-4-3-8-8-8z" fill="${color}"/></svg>`;
+
+    petal.addEventListener('animationend', () => petal.remove());
+    petalsContainer.appendChild(petal);
+  }
+
+  for (let i = 0; i < 6; i++) {
+    setTimeout(spawnPetal, i * 400);
+  }
+  setInterval(spawnPetal, 650);
+</script>
+
+</body>
+</html>
