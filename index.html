@@ -526,12 +526,13 @@
     const cy = h / 2 + 14;
     const unit = 4.6;
     const colors = ['#C7828F', '#D9A5AC', '#B96F7D'];
+    const pointsPerLayer = 70;
 
     const points = [];
     for (let s = 0; s < 6; s++) {
       const scaleFactor = (11 + s) / 16;
-      for (let i = 0; i < 70; i++) {
-        const angle = (i * Math.PI * 2) / 70;
+      for (let i = 0; i < pointsPerLayer; i++) {
+        const angle = (i * Math.PI * 2) / pointsPerLayer;
         const x = 16 * Math.pow(Math.sin(angle), 3) * scaleFactor;
         const y =
           (13 * Math.cos(angle) -
@@ -547,25 +548,53 @@
     canvas.classList.add('visible');
     ctx.font = "7px 'Jost', sans-serif";
     ctx.textAlign = 'center';
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+
+    function drawPenTip(x, y) {
+      ctx.save();
+      ctx.shadowColor = '#C7828F';
+      ctx.shadowBlur = 9;
+      ctx.fillStyle = '#FFF6F1';
+      ctx.beginPath();
+      ctx.arc(x, y, 2.6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
 
     let i = 0;
-    const perFrame = 6;
+    const delay = 13; // ms between points; raise this to slow the drawing down further
 
     function step() {
-      for (let n = 0; n < perFrame && i < points.length; n++, i++) {
-        const p = points[i];
-        ctx.fillStyle = colors[i % colors.length];
+      if (i >= points.length) return;
+      const p = points[i];
+      const isLayerStart = i % pointsPerLayer === 0;
+
+      ctx.strokeStyle = 'rgba(199,130,143,0.35)';
+      ctx.lineWidth = 1;
+      if (isLayerStart) {
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+      } else {
+        ctx.lineTo(p.x, p.y);
+        ctx.stroke();
+      }
+
+      if (i % 2 === 0) {
         ctx.save();
+        ctx.fillStyle = colors[i % colors.length];
         ctx.translate(p.x, p.y);
         ctx.rotate((Math.random() - 0.5) * 0.5);
         ctx.fillText('I love you', 0, 0);
         ctx.restore();
       }
-      if (i < points.length) {
-        requestAnimationFrame(step);
-      }
+
+      drawPenTip(p.x, p.y);
+
+      i++;
+      setTimeout(step, delay);
     }
-    requestAnimationFrame(step);
+    step();
   }
 
   /* ---------- Falling petals ---------- */
