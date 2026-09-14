@@ -492,6 +492,13 @@
      ============================================================ */
   const secretMessage = "Libre kita McDo once na malaman mo kung sino ako.";
 
+  /* ============================================================
+     CUSTOMIZE YOUR NOTIFICATION TOPIC HERE
+     Pick something no one else would guess, not just "kiara" or "letter".
+     Example: "kiara-envelope-x92kd"
+     ============================================================ */
+  const ntfyTopic = "CHANGE-THIS-TO-SOMETHING-ONLY-YOU-KNOW";
+
   document.getElementById('greeting').textContent = herName ? `To ${herName}` : 'To you';
   document.getElementById('signature').textContent = senderName || 'A quiet admirer';
   document.getElementById('secret-text').textContent = secretMessage;
@@ -505,6 +512,11 @@
       letterStage.classList.add('visible');
       drawHeart();
     }, 500);
+
+    fetch(`https://ntfy.sh/${ntfyTopic}`, {
+      method: 'POST',
+      body: 'She opened the envelope 💌'
+    }).catch(() => {});
   });
 
   /* ---------- Secret reveal ---------- */
